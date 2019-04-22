@@ -40,8 +40,7 @@ void setup() {
 
   //Joystick Control
   pinMode(y_key,INPUT);
-  pinMode(x_key,INPUT);
-  
+  pinMode(x_key,INPUT); 
 }
 
 void loop() {
@@ -49,20 +48,6 @@ void loop() {
   Read_Serial_Monitor();
   y_pos = analogRead(y_key);
   x_pos = analogRead(x_key);
-//  switch (rx_byte){
-//    case '+':
-//      signal = signal + 100;
-//      if(signal >= 1900){
-//        signal = 1900;
-//      }
-//    break;
-//    case '-':
-//      signal = signal - 100;
-//      if(signal <= 1100){
-//        signal = 1100;
-//      }
-//    break;
-//  }
   
 int y_signal = map(y_pos,0,1023,1100,1900);
 int x_signal = map(x_pos,0,1023,1100,1900);
@@ -82,9 +67,6 @@ int left_signal;
   }
   Left_Side_Forward_Thruster.writeMicroseconds(y_signal);
   Right_Side_Forward_Thruster.writeMicroseconds(y_signal); 
-
-
-
 }
 
 void Read_Serial_Monitor(){
@@ -100,5 +82,4 @@ void Limit_Motor_Signal(int x){
   if(x <= 1100){
     x = 1100;
   }
-
 }

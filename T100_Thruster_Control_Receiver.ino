@@ -61,21 +61,6 @@ void loop() {
   int y_pos = Input_ReceivedMessage[1];
   int x_pos = Input_ReceivedMessage[0];
   
-//  switch (rx_byte){
-//    case '+':
-//      signal = signal + 100;
-//      if(signal >= 1900){
-//        signal = 1900;
-//      }
-//    break;
-//    case '-':
-//      signal = signal - 100;
-//      if(signal <= 1100){
-//        signal = 1100;
-//      }
-//    break;
-//  }
-  
 int y_signal = map(y_pos,0,1023,1100,1900);
 int x_signal = map(x_pos,0,1023,1100,1900);
 int right_signal;
@@ -98,12 +83,6 @@ Limit_Motor_Signal(x_signal);
 
 
 }
-
-//void Read_Serial_Monitor(){
-//    if (Serial.available() > 0) {    // is a character available?
-//      rx_byte = Serial.read();       // get the character
-//    }
-//}
 
 void Limit_Motor_Signal(int x){
   if(x >= 1900){
