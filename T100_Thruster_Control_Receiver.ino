@@ -1,3 +1,8 @@
+/*
+  Source https://howtomechatronics.com/tutorials/arduino/arduino-wireless-communication-nrf24l01-tutorial/
+*/
+
+
 #include <Servo.h>
 #include <SPI.h>
 #include <RF24.h>
@@ -26,8 +31,6 @@ RF24 radio(9,10); //Setup of the RF24 radio on SPI pin 9 and 10 on the Arduino U
 
 const uint64_t pipe = 0xE6E6E6E6E6E6;  //Radio Channel that is used for communicating the 2 NRF24L01 Transmitter and Receiver
 
-//For Serial Command
-//char rx_byte = 0;
 
 //For Motor Control
 int stop_signal = 1500;
@@ -56,40 +59,36 @@ void setup() {
 }
 
 void loop() {
-   // Set signal value, which should be between 1100 and 1900
-//Read_Serial_Monitor();
+  // Set signal value, which should be between 1100 and 1900
+  //Read_Serial_Monitor();
   int y_pos = Input_ReceivedMessage[1];
   int x_pos = Input_ReceivedMessage[0];
-  
-int y_signal = map(y_pos,0,1023,1100,1900);
-int x_signal = map(x_pos,0,1023,1100,1900);
-int right_signal;
-int left_signal;
+    
+  int y_signal = map(y_pos,0,1023,1100,1900);
+  int x_signal = map(x_pos,0,1023,1100,1900);
+  int right_signal;
+  int left_signal;
 
-Limit_Motor_Signal(y_signal);
-Limit_Motor_Signal(x_signal);
-  if(x_signal > 1489){
-      int right_signal = map(x_signal,1489,1900,1500,1900);
-      Right_Back_Thruster.writeMicroseconds(right_signal); 
-  }
-  if(x_signal <= 1489){
-      int left_signal = map(x_signal,1489,1100,1500,1900);
-       Serial.println(left_signal);
-      Left_Back_Thruster.writeMicroseconds(left_signal);  
-  }
-  Left_Side_Forward_Thruster.writeMicroseconds(y_signal);
-  Right_Side_Forward_Thruster.writeMicroseconds(y_signal); 
-
-
-
+  Limit_Motor_Signal(y_signal);
+  Limit_Motor_Signal(x_signal);
+    if(x_signal > 1489){
+        int right_signal = map(x_signal,1489,1900,1500,1900);
+        Right_Back_Thruster.writeMicroseconds(right_signal); 
+    }
+    else if(x_signal <= 1489){
+        int left_signal = map(x_signal,1489,1100,1500,1900);
+        Serial.println(left_signal);
+        Left_Back_Thruster.writeMicroseconds(left_signal);  
+    }
+    Left_Side_Forward_Thruster.writeMicroseconds(y_signal);
+    Right_Side_Forward_Thruster.writeMicroseconds(y_signal); 
 }
 
 void Limit_Motor_Signal(int x){
   if(x >= 1900){
     x = 1900;
   }
-  if(x <= 1100){
+  else if(x <= 1100){
     x = 1100;
   }
-
 }

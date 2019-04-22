@@ -1,3 +1,6 @@
+/*
+  Source https://howtomechatronics.com/tutorials/arduino/arduino-wireless-communication-nrf24l01-tutorial/
+*/
 #include <Servo.h>
 
 byte servoPin_LF = 6; //Left Forward Thruster
