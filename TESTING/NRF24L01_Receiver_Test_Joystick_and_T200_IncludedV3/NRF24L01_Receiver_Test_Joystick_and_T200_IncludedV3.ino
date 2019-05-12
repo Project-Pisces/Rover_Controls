@@ -15,9 +15,16 @@ Servo Front_Left_Thruster;
 Servo Back_Right_Thruster;
 Servo Back_Left_Thruster;
 
-int max_thrust_signal = 1700;    //Signal for ESC for maximum forward thrust NOTE:MAX SIGNAL = 1900, MIN = 1100
-int min_thrust_signal = 1300;    //Signal for ESC for maximum reverse thrust
+int max_thrust_signal = 1600;    //Signal for ESC for maximum forward thrust NOTE:MAX SIGNAL = 1900, MIN = 1100
+int min_thrust_signal = 1400;    //Signal for ESC for maximum reverse thrust
 int stop_thrust_signal = 1500;  //Signal for ESC to stop the thrusters
+
+//Variables to store various signals for each thruster.
+int FRT_Signal; //Front Right Thruster Signal
+int FLT_Signal; //Front Left Thruster Signal
+int BRT_Signal; //Back Right Thruster Signal
+int BLT_Signal; //Back Left Thruster Signal
+
 //Radio Frequency Receiver Initialization Setup
 
 float Input_ReceivedMessage[6] = {000};  //Used to store value received by NRF24L01 for X and Y input, Element 0 = X Input, Element 1 = Y Input
@@ -53,7 +60,7 @@ int H2O_Sensor = A0;
 void setup() {
   // declare pin 9 to be an output:
   //pinMode(led, OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(19200);
 
   //H20 Sensor Setup
   pinMode(H2O_Sensor,INPUT);
@@ -92,70 +99,131 @@ void loop() {
     Current_Angle = Input_ReceivedMessage[2];  //Assigns input received value as the y position which should relay from transmitter code.
     X_Signal = Input_ReceivedMessage[3];  //Assigns input received value as the y position which should relay from transmitter code.
     Y_Signal = Input_ReceivedMessage[4];  //Assigns input received value as the y position which should relay from transmitter code.
-//    X_Signal = Limit_Motor_Signal(X_Signal);
-//    Y_Signal = Limit_Motor_Signal(Y_Signal);
+    X_Signal = Limit_Motor_Signal(X_Signal);
+    Y_Signal = Limit_Motor_Signal(Y_Signal);
 //    int x_signal = map(x_pos, 0, 1023,min_thrust_signal,max_thrust_signal);  //Maps the value of the analog signal to the correct ESC desired powered Signal for the X-direction
 //    int y_signal = map(y_pos, 0, 1023,min_thrust_signal,max_thrust_signal);  //Maps the value of the analog signal to the correct ESC desired powered Signal for the Y-direction
 //    Limit_Motor_Signal(x_signal);  //Limits the motor signals to make sure that the ESC doesn't run the motor at an unexpected PWM rate
 //    Limit_Motor_Signal(y_signal);
 
-//  if(Current_Angle > AngleBound8 && Current_Angle <=AngleBound1){  // Clockwise (CW) Movement Quadrant
+  if(Current_Angle > AngleBound8 && Current_Angle <=AngleBound1 && Xaverage > 250){  // Clockwise (CW) Movement Quadrant, Joystick is moved to the right
 //    Front_Right_Thruster.writeMicroseconds(map(X_Signal,min_thrust_signal,max_thrust_signal,max_thrust_signal,min_thrust_signal));//Needs to go opposite direction at same magnitude
 //    Front_Left_Thruster.writeMicroseconds(X_Signal);
 //    Back_Right_Thruster.writeMicroseconds(map(X_Signal,min_thrust_signal,max_thrust_signal,max_thrust_signal,min_thrust_signal));//Needs to go opposite direction at same magnitude
 //    Back_Left_Thruster.writeMicroseconds(X_Signal);
-//  }
-////  else if(Current_Angle > AngleBound1 && Current_Angle <=AngleBound2){  // Drift Right (DR) Movement Quadrant
+
+      //Map Function Used to Flip the signal for thruster to "push" in the opposite direction
+      int FRT_Signal = min_thrust_signal; //Front Right Thruster Signal
+      int FLT_Signal = max_thrust_signal; //Front Left Thruster Signal
+      int BRT_Signal = min_thrust_signal; //Back Right Thruster Signal
+      int BLT_Signal = max_thrust_signal; //Back Left Thruster Signal
+      Serial.println("Moving Right");   
+      Serial.println(BLT_Signal); 
+      Front_Right_Thruster.writeMicroseconds(FRT_Signal);
+      Front_Left_Thruster.writeMicroseconds(FLT_Signal);
+      Back_Right_Thruster.writeMicroseconds(BLT_Signal);
+      Back_Left_Thruster.writeMicroseconds(BRT_Signal);
+            
+  }
+////  else if(Current_Angle > AngleBound1 && Current_Angle <=AngleBound2){  // Drift Right (DR) Movement Quadrant (CURRENTLY NOT USED)
 ////    //TBD
 ////  }
-//  else if(Current_Angle > AngleBound2 && Current_Angle <=AngleBound3){  // Forward (FW) Movement Quadrant
+  else if(Current_Angle > AngleBound2 && Current_Angle <=AngleBound3 && Yaverage > 250){  // Forward (FW) Movement Quadrant
 //    Front_Right_Thruster.writeMicroseconds(Y_Signal);
 //    Front_Left_Thruster.writeMicroseconds(Y_Signal);
 //    Back_Right_Thruster.writeMicroseconds(Y_Signal);
 //    Back_Left_Thruster.writeMicroseconds(Y_Signal);
-//  }
-////  else if(Current_Angle > AngleBound3 && Current_Angle <=AngleBound4){  // Drift Left (DL) Movement Quadrant
+
+      int FRT_Signal = max_thrust_signal; //Front Right Thruster Signal
+      int FLT_Signal = max_thrust_signal; //Front Left Thruster Signal
+      int BRT_Signal = max_thrust_signal; //Back Right Thruster Signal
+      int BLT_Signal = max_thrust_signal; //Back Left Thruster Signal
+      Serial.println("Moving Forward");
+      Serial.println(BLT_Signal);
+      Front_Right_Thruster.writeMicroseconds(FRT_Signal);
+      Front_Left_Thruster.writeMicroseconds(FLT_Signal);
+      Back_Right_Thruster.writeMicroseconds(BLT_Signal);
+      Back_Left_Thruster.writeMicroseconds(BRT_Signal);
+
+  }
+////  else if(Current_Angle > AngleBound3 && Current_Angle <=AngleBound4){  // Drift Left (DL) Movement Quadrant (CURRENTLY NOT USED)
 ////    //TBD
 ////  }
-//  else if((Current_Angle > AngleBound4 && Current_Angle <= Mid_Point_Angle) ){  // Counter-Clockwise (CCW) Movement Quadrant
+  else if((Current_Angle > AngleBound4 && Current_Angle <= Mid_Point_Angle && Xaverage < -250) ){  // Counter-Clockwise (CCW) Movement Quadrant
 //    Front_Right_Thruster.writeMicroseconds(map(X_Signal,min_thrust_signal,max_thrust_signal,max_thrust_signal,min_thrust_signal));//Needs to go opposite direction at same magnitude
 //    Front_Left_Thruster.writeMicroseconds(X_Signal);
 //    Back_Right_Thruster.writeMicroseconds(map(X_Signal,min_thrust_signal,max_thrust_signal,max_thrust_signal,min_thrust_signal));//Needs to go opposite direction at same magnitude
 //    Back_Left_Thruster.writeMicroseconds(X_Signal);
-//  }
-////  else if(Current_Angle > AngleBound5 && Current_Angle <=AngleBound6){  // Drift Backwards Left (DBL) Movement Quadrant
+      
+      //Map Function Used to Flip the signal for thruster to "push" in the opposite direction
+      int FRT_Signal = max_thrust_signal; //Front Right Thruster Signal
+      int FLT_Signal = min_thrust_signal; //Front Left Thruster Signal
+      int BRT_Signal = max_thrust_signal; //Back Right Thruster Signal
+      int BLT_Signal = min_thrust_signal; //Back Left Thruster Signal
+      Serial.println("Moving Left");
+      Serial.println(BLT_Signal);
+          Front_Right_Thruster.writeMicroseconds(FRT_Signal);
+      Front_Left_Thruster.writeMicroseconds(FLT_Signal);
+      Back_Right_Thruster.writeMicroseconds(BLT_Signal);
+      Back_Left_Thruster.writeMicroseconds(BRT_Signal);
+  }
+////  else if(Current_Angle > AngleBound5 && Current_Angle <=AngleBound6){  // Drift Backwards Left (DBL) Movement Quadrant (CURRENTLY NOT USED)
 ////    //TBD
 ////  }
-//  else if(Current_Angle > AngleBound6 && Current_Angle <=AngleBound7){  // Backwards (BW) Movement Quadrant
+  else if(Current_Angle > AngleBound6 && Current_Angle <=AngleBound7 && Yaverage < -250){  // Backwards (BW) Movement Quadrant
 //    Front_Right_Thruster.writeMicroseconds(Y_Signal);
 //    Front_Left_Thruster.writeMicroseconds(Y_Signal);
 //    Back_Right_Thruster.writeMicroseconds(Y_Signal);
 //    Back_Left_Thruster.writeMicroseconds(Y_Signal);
-//  }
-////  else if(Current_Angle > AngleBound7 && Current_Angle <=AngleBound8){  // Drift Backwards Right (DBR) Movement Quadrant
+      
+      int FRT_Signal = min_thrust_signal; //Front Right Thruster Signal
+      int FLT_Signal = min_thrust_signal; //Front Left Thruster Signal
+      int BRT_Signal = min_thrust_signal; //Back Right Thruster Signal
+      int BLT_Signal = min_thrust_signal; //Back Left Thruster Signal
+      Serial.println("Moving Backwards");
+      Serial.println(BLT_Signal);
+      Front_Right_Thruster.writeMicroseconds(FRT_Signal);
+      Front_Left_Thruster.writeMicroseconds(FLT_Signal);
+      Back_Right_Thruster.writeMicroseconds(BLT_Signal);
+      Back_Left_Thruster.writeMicroseconds(BRT_Signal);
+  }
+////  else if(Current_Angle > AngleBound7 && Current_Angle <=AngleBound8){  // Drift Backwards Right (DBR) Movement Quadrant (CURRENTLY NOT USED)
 ////    //TBD
 ////  }
 //   
 ////    Serial.println("The X Position is ");
 ////    Serial.println(Input_ReceivedMessage[4]);
 ////    Serial.println("The Y Position is");
-////    Serial.println(Input_ReceivedMessage[1]);
+//    Serial.println(BLT_Signal);
   
-//  else  //if none of the actions above are being used the tell the thrusters that they should not be moving.
-// {
-  Front_Right_Thruster.writeMicroseconds(stop_thrust_signal);
-  Front_Left_Thruster.writeMicroseconds(stop_thrust_signal);
-  Back_Right_Thruster.writeMicroseconds(stop_thrust_signal);
-  Back_Left_Thruster.writeMicroseconds(stop_thrust_signal);
-// }
+//    else  //if none of the actions above are being used the tell the thrusters that they should not be moving.
+//    {
+//      int FRT_Signal = stop_thrust_signal; //Front Right Thruster Signal
+//      int FLT_Signal = stop_thrust_signal; //Front Left Thruster Signal
+//      int BRT_Signal = stop_thrust_signal; //Back Right Thruster Signal
+//      int BLT_Signal = stop_thrust_signal; //Back Left Thruster Signal  
+//    }
+  else if(Xaverage < 250 && Xaverage > -250 && Yaverage < 250 && Yaverage > -250)
+  {
+      int FRT_Signal = stop_thrust_signal; //Front Right Thruster Signal
+      int FLT_Signal = stop_thrust_signal; //Front Left Thruster Signal
+      int BRT_Signal = stop_thrust_signal; //Back Right Thruster Signal
+      int BLT_Signal = stop_thrust_signal; //Back Left Thruster Signal
+      Serial.println(BLT_Signal);
+      Front_Right_Thruster.writeMicroseconds(FRT_Signal);
+      Front_Left_Thruster.writeMicroseconds(FLT_Signal);
+      Back_Right_Thruster.writeMicroseconds(BLT_Signal);
+      Back_Left_Thruster.writeMicroseconds(BRT_Signal);
+  }
+    Serial.println(Xaverage);
     delay(5);
-
+    
     radio.stopListening();  //Gives the NRF24L01 the ability to send data back to the controller
     int Water_Reading = analogRead(H2O_Sensor);
     Output_SentMessage[0] = Water_Reading;
     Serial.println(Water_Reading);
     radio.write(&Output_SentMessage,sizeof(Output_SentMessage));
-    delay(5);
+    delay(50);
     
   }
 
@@ -165,7 +233,7 @@ void loop() {
 int Limit_Motor_Signal(int ESC_Signal){  //Limits the motor signal of maximum and minimum thrust values
   int x;
   if(x >= max_thrust_signal){
-    x = 1900;
+    x = max_thrust_signal;
   }
   if(x <= min_thrust_signal){
     x = min_thrust_signal;

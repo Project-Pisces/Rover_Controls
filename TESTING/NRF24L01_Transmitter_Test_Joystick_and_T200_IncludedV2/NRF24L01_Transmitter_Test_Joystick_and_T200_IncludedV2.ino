@@ -9,9 +9,9 @@ RF24 radio(7,8); //Setup of the RF24 radio on SPI pin 9 and 10 on the Arduino Un
 const byte addresses[][6] = {"00001", "00002"};  //Radio Channel that is used for communicating the 2 NRF24L01 Transmitter and Receiver
 
 //For Joystick
-int y_key = A0;
+int y_key = A2;
 int y_pos;
-int x_key = A2;
+int x_key = A0;
 int x_pos;
 
 int Neutral_Bias_X = 500;
@@ -31,8 +31,8 @@ int Current_Angle;
 
 
 // ESC Readable Signal
-int max_thrust_signal = 1700;  //Signal for ESC for maximum forward thrust NOTE:MAX SIGNAL = 1900, MIN = 1100
-int min_thrust_signal = 1300;  //Signal for ESC for maximum reverse thrust
+int max_thrust_signal = 1600;  //Signal for ESC for maximum forward thrust NOTE:MAX SIGNAL = 1900, MIN = 1100
+int min_thrust_signal = 1400;  //Signal for ESC for maximum reverse thrust
 int stop_thrust_signal = 1500; //Signal for ESC to stop the thrusters
 int X_Signal;
 int Y_Signal;
@@ -105,6 +105,7 @@ void loop() {
   Yaverage = Ytotal / numReadings;
 
   Current_Angle = (180/PI)*atan2(Yaverage,Xaverage);
+  Serial.println(Current_Angle);
   
  ////////// Conversion of Input Data into Readable Signal for ESC Motor Control ////////
 
@@ -146,7 +147,7 @@ void loop() {
       }
     }
     Serial.println(ledState);
-  delay(5);
+  delay(50);
 }
 //////////  FUNCTION PROTOTYPES  /////////
 
